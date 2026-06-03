@@ -37,7 +37,7 @@ const SLIDES: HeroSlide[] = [
 
 function LogoLine({ text, offset = 0 }: { text: string; offset?: number }) {
   return (
-    <span className="wg-logo-text font-display text-[clamp(4.25rem,15vw,14rem)] uppercase leading-[0.78]">
+    <span className="wg-logo-text font-display text-[clamp(3.25rem,17vw,14rem)] uppercase leading-[0.78] sm:text-[clamp(4.25rem,15vw,14rem)]">
       {Array.from(text).map((letter, index) => (
         <span
           key={`${letter}-${index}`}
@@ -115,7 +115,7 @@ export function WorldGeniusHero() {
 
   return (
     <section
-      className="wg-hero relative min-h-[100svh] overflow-hidden bg-black text-white"
+      className="wg-hero relative min-h-[100dvh] overflow-hidden bg-black text-white"
       aria-label="World G3nius campaign carousel"
     >
       {SLIDES.map((slide, index) => {
@@ -157,7 +157,7 @@ export function WorldGeniusHero() {
       <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(0,0,0,0.34)_0%,rgba(0,0,0,0.08)_42%,rgba(0,0,0,0.54)_100%)]" />
       <div className="absolute inset-0 wg-scanlines opacity-25" aria-hidden />
 
-      <div className="relative z-10 flex min-h-[100svh] flex-col items-center justify-center px-5 pt-24 text-center">
+      <div className="relative z-10 flex min-h-[100dvh] flex-col items-center justify-center px-4 pt-24 text-center sm:px-5">
         <p className="mb-5 text-[11px] font-semibold uppercase tracking-[0.28em] text-white/76">
           Live drop
         </p>
@@ -169,7 +169,7 @@ export function WorldGeniusHero() {
           <LogoLine text="WORLD" />
           <LogoLine text="G3NIUS" offset={5} />
         </Link>
-        <p className="mt-7 max-w-xl text-sm font-medium uppercase tracking-[0.18em] text-white/84 sm:text-base">
+        <p className="mt-6 max-w-xl text-xs font-medium uppercase tracking-[0.16em] text-white/84 sm:mt-7 sm:text-base sm:tracking-[0.18em]">
           WORLD IN OUR EYES.
         </p>
       </div>

@@ -169,12 +169,12 @@ export function StoreProductCard({ product }: Props) {
           ) : null}
         </div>
 
-        <div className="absolute inset-x-3 bottom-3 translate-y-3 opacity-0 transition duration-300 group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:translate-y-0 group-focus-within:opacity-100">
-          <div className="border border-white/28 bg-black/82 p-3 text-white shadow-2xl backdrop-blur-md">
+        <div className="absolute inset-x-2 bottom-2 translate-y-0 opacity-100 transition duration-300 sm:inset-x-3 sm:bottom-3 sm:translate-y-3 sm:opacity-0 sm:group-hover:translate-y-0 sm:group-hover:opacity-100 sm:group-focus-within:translate-y-0 sm:group-focus-within:opacity-100">
+          <div className="border border-white/28 bg-black/86 p-2.5 text-white shadow-2xl backdrop-blur-md sm:p-3">
             <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.18em] text-white/70">
               Select size
             </p>
-            <div className="grid grid-cols-5 gap-1.5">
+            <div className="grid grid-cols-5 gap-1">
               {sizes.slice(0, 5).map((size) => (
                 <button
                   key={size}
@@ -188,7 +188,7 @@ export function StoreProductCard({ product }: Props) {
                   onKeyDown={(event) => {
                     event.stopPropagation();
                   }}
-                  className="grid h-9 place-items-center border border-white/30 text-[11px] font-bold uppercase text-white transition-colors hover:border-white hover:bg-white hover:text-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white disabled:cursor-not-allowed disabled:opacity-45"
+                  className="grid h-8 min-w-0 place-items-center border border-white/30 text-[10px] font-bold uppercase text-white transition-colors hover:border-white hover:bg-white hover:text-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white disabled:cursor-not-allowed disabled:opacity-45 sm:h-9 sm:text-[11px]"
                   aria-label={`Add ${product.name} in size ${size} to cart`}
                 >
                   {addingSize === size ? "..." : addedSize === size ? "OK" : size}
@@ -204,15 +204,15 @@ export function StoreProductCard({ product }: Props) {
         </div>
       </div>
 
-      <div className="flex min-h-[5.75rem] flex-1 flex-col justify-center border-x border-b border-black/10 bg-white p-3 sm:min-h-[6.25rem] sm:p-4">
-        <div className="grid min-h-[4.4rem] grid-cols-[minmax(0,1fr)_auto] items-start gap-3">
-          <h3 className="m-0 line-clamp-2 min-w-0 font-display text-[1.55rem] uppercase leading-[0.88] transition-colors group-hover:text-foreground/70 sm:text-[1.8rem]">
+      <div className="flex min-h-[5.25rem] flex-1 flex-col justify-center border-x border-b border-black/10 bg-white p-2.5 sm:min-h-[6.25rem] sm:p-4">
+        <div className="grid min-h-[4rem] grid-cols-1 items-start gap-1.5 sm:min-h-[4.4rem] sm:grid-cols-[minmax(0,1fr)_auto] sm:gap-3">
+          <h3 className="m-0 line-clamp-2 min-w-0 font-display text-[clamp(1.05rem,5vw,1.35rem)] uppercase leading-[0.9] transition-colors group-hover:text-foreground/70 sm:text-[1.8rem]">
             {product.name}
           </h3>
           <Price
             amount={product.default_price}
             currency={brand.currency as CurrencyCode}
-            className="shrink-0 pt-0.5 text-sm font-black tabular-nums"
+            className="shrink-0 text-[12px] font-black tabular-nums sm:pt-0.5 sm:text-sm"
           />
         </div>
       </div>

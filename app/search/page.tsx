@@ -28,7 +28,7 @@ function SearchSkeleton() {
   return (
     <div>
       <div className="h-12 w-full max-w-xl bg-muted rounded animate-pulse mb-8" />
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
         {Array.from({ length: 8 }).map((_, i) => (
           <div key={i} className="aspect-[4/3] bg-muted rounded-2xl animate-pulse" />
         ))}

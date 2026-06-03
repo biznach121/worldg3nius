@@ -116,7 +116,7 @@ export function ShopClient({
             value={query}
             onChange={(event) => setQuery(event.target.value)}
             placeholder="Search jerseys, bags, tees..."
-            className="h-14 min-w-0 flex-1 bg-transparent px-4 font-display text-base uppercase outline-none placeholder:text-black/35 sm:text-lg"
+            className="h-14 min-w-0 flex-1 bg-transparent px-3 font-display text-sm uppercase outline-none placeholder:text-black/35 sm:px-4 sm:text-lg"
           />
           {query ? (
             <button
@@ -130,14 +130,14 @@ export function ShopClient({
           ) : null}
         </form>
 
-        <div className="flex items-center gap-3">
-          <p className="m-0 text-sm uppercase text-muted-foreground">
+        <div className="flex items-center justify-between gap-3 sm:justify-start">
+          <p className="m-0 shrink-0 text-sm uppercase text-muted-foreground">
             {filteredProducts.length} / {products.length}
           </p>
           <button
             type="button"
             onClick={() => setFiltersOpen(true)}
-            className="inline-flex h-14 items-center gap-3 border border-black bg-black px-5 font-display text-sm uppercase text-white transition-colors hover:bg-white hover:text-black"
+            className="inline-flex h-14 min-w-0 items-center gap-3 border border-black bg-black px-4 font-display text-sm uppercase text-white transition-colors hover:bg-white hover:text-black sm:px-5"
           >
             <svg
               viewBox="0 0 24 24"
@@ -163,7 +163,7 @@ export function ShopClient({
 
       <ProductGrid
         products={filteredProducts}
-        columns={{ sm: 2, md: 3, lg: 4, xl: 4 }}
+        columns={{ sm: 1, md: 2, lg: 4, xl: 4 }}
         emptyMessage="No products matched that search."
         renderCard={(product) => <StoreProductCard product={product} />}
       />
@@ -177,7 +177,7 @@ export function ShopClient({
           onClick={() => setFiltersOpen(false)}
         >
           <aside
-            className="ml-auto flex h-full w-full max-w-md flex-col bg-white text-black shadow-2xl"
+            className="ml-auto flex h-[100dvh] w-full max-w-md flex-col bg-white text-black shadow-2xl"
             onClick={(event) => event.stopPropagation()}
           >
             <div className="flex items-center justify-between border-b border-black/10 px-5 py-4">
@@ -207,14 +207,14 @@ export function ShopClient({
                     type="button"
                     onClick={() => setSelectedCategory("all")}
                     className={[
-                      "flex min-h-12 items-center justify-between border px-4 text-left font-display uppercase transition-colors",
+                      "flex min-h-12 min-w-0 items-center justify-between gap-3 border px-4 text-left font-display uppercase transition-colors",
                       selectedCategory === "all"
                         ? "border-black bg-black text-white"
                         : "border-black/15 bg-white text-black hover:border-black",
                     ].join(" ")}
                   >
-                    <span>All products</span>
-                    <span>{products.length}</span>
+                    <span className="min-w-0 truncate">All products</span>
+                    <span className="shrink-0">{products.length}</span>
                   </button>
                   {categories.map((category) => {
                     const count = products.filter((product) => product.category_id === category.id).length;
@@ -224,14 +224,14 @@ export function ShopClient({
                         type="button"
                         onClick={() => setSelectedCategory(category.id)}
                         className={[
-                          "flex min-h-12 items-center justify-between border px-4 text-left font-display uppercase transition-colors",
+                          "flex min-h-12 min-w-0 items-center justify-between gap-3 border px-4 text-left font-display uppercase transition-colors",
                           selectedCategory === category.id
                             ? "border-black bg-black text-white"
                             : "border-black/15 bg-white text-black hover:border-black",
                         ].join(" ")}
                       >
-                        <span>{category.name}</span>
-                        <span>{count}</span>
+                        <span className="min-w-0 truncate">{category.name}</span>
+                        <span className="shrink-0">{count}</span>
                       </button>
                     );
                   })}

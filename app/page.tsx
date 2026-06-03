@@ -105,7 +105,7 @@ export default async function HomePage() {
           link={{ label: "Browse all", href: "/shop" }}
         />
         <Suspense fallback={<GridSkeleton count={4} />}>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
             {newArrivals.slice(0, 4).map((p) => (
               <StoreProductCard key={p.id} product={p} />
             ))}
@@ -157,7 +157,7 @@ function ProductSpotlight({ products }: { products: Product[] }) {
             All products
           </Link>
         </div>
-        <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {products.slice(0, 4).map((product) => (
             <StoreProductCard key={product.id} product={product} />
           ))}
@@ -176,7 +176,7 @@ function CampaignStatement() {
             <p className="mb-4 text-[11px] font-bold uppercase tracking-[0.26em] text-black/54">
               World code
             </p>
-            <h2 className="m-0 max-w-xl font-display text-[clamp(4rem,10vw,9.5rem)] uppercase leading-[0.82]">
+            <h2 className="m-0 max-w-xl font-display text-[clamp(3.1rem,15vw,9.5rem)] uppercase leading-[0.82] sm:text-[clamp(4rem,10vw,9.5rem)]">
               Genius is a uniform.
             </h2>
           </div>
@@ -201,12 +201,12 @@ function CampaignStatement() {
             </div>
           </div>
         </div>
-        <div className="grid min-h-[70svh] gap-5 sm:grid-cols-2">
+        <div className="grid min-h-[52svh] gap-5 sm:min-h-[70svh] sm:grid-cols-2">
           {CAMPAIGN_IMAGES.map((src, index) => (
             <div
               key={src}
               className={[
-                "relative min-h-[58svh] overflow-hidden bg-muted",
+                "relative min-h-[46svh] overflow-hidden bg-muted sm:min-h-[58svh]",
                 index === 1 ? "sm:mt-16" : "",
               ].join(" ")}
             >
@@ -230,7 +230,7 @@ function CampaignStatement() {
 
 function GridSkeleton({ count }: { count: number }) {
   return (
-    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
+    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
       {Array.from({ length: count }).map((_, i) => (
         <div key={i} className="aspect-[4/3] bg-muted rounded-2xl animate-pulse" />
       ))}
@@ -242,7 +242,7 @@ function StripSkeleton({ title }: { title: string }) {
   return (
     <section className="max-w-7xl mx-auto px-6 sm:px-8 py-12">
       <h2 className="text-[26px] font-semibold m-0 mb-5">{title}</h2>
-      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {Array.from({ length: 4 }).map((_, i) => (
           <div key={i} className="aspect-square bg-muted rounded-2xl animate-pulse" />
         ))}

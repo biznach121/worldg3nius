@@ -54,7 +54,7 @@ export function MobileNav() {
       </button>
 
       {open ? (
-        <div className="fixed inset-0 z-50 sm:hidden">
+        <div className="fixed inset-0 z-50 md:hidden">
           <button
             type="button"
             onClick={() => setOpen(false)}
@@ -64,7 +64,7 @@ export function MobileNav() {
           <nav
             id="mobile-nav-drawer"
             aria-label="Mobile navigation"
-            className="absolute inset-y-0 right-0 w-[85%] max-w-sm flex flex-col bg-background border-l border-border shadow-2xl"
+            className="absolute inset-y-0 right-0 flex w-[86%] max-w-sm flex-col border-l border-border bg-background shadow-2xl"
           >
             <div className="flex items-center justify-between px-6 py-4 border-b border-border">
               <span className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">

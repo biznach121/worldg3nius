@@ -27,7 +27,7 @@ const APPAREL_IMAGES = [
     categoryTerms: ["jerseys", "jersey"],
   },
   {
-    src: "https://res.cloudinary.com/dcc5ggnkc/image/upload/v1780487898/tyinud3c4kowb0c4ilm3.png",
+    src: "https://res.cloudinary.com/dcc5ggnkc/image/upload/v1780488090/cplqhjp5g7n2fevyzftc.png",
     title: "Bottoms",
     eyebrow: "02",
     fallbackHref: "/search?q=bottoms",

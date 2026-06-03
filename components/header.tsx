@@ -44,14 +44,14 @@ export function Header() {
     <>
     <header
       className={[
-        "fixed top-0 inset-x-0 z-40 grid grid-cols-[1fr_auto_1fr] items-center px-5 sm:px-10 py-3 transition-all duration-500",
+        "fixed top-0 inset-x-0 z-40 grid grid-cols-[1fr_auto_1fr] items-center px-4 py-3 transition-all duration-500 sm:px-6 lg:px-10",
         isTransparent
           ? "border-b border-transparent bg-transparent text-white"
           : "border-b border-border bg-background/92 text-foreground shadow-[0_1px_0_rgba(0,0,0,0.04)] backdrop-blur-xl",
       ].join(" ")}
     >
       <div className="flex items-center justify-start">
-        <nav className="hidden sm:flex items-center gap-5 sm:gap-7 uppercase tracking-wide text-[12px]">
+        <nav className="hidden md:flex items-center gap-5 lg:gap-7 uppercase tracking-wide text-[12px]">
           {brand.header.nav.map((link) => (
             <Link
               key={`${link.label}-${link.href}`}
@@ -71,7 +71,7 @@ export function Header() {
             </Link>
           ))}
         </nav>
-        <div className="sm:hidden">
+        <div className="md:hidden">
           <MobileNav />
         </div>
       </div>
@@ -97,8 +97,10 @@ export function Header() {
           G3NIUS
         </span>
       </Link>
-      <div className="flex items-center justify-end gap-3 sm:gap-5">
-        <AccountPill />
+      <div className="flex items-center justify-end gap-2 sm:gap-4 lg:gap-5">
+        <div className="hidden sm:block">
+          <AccountPill />
+        </div>
         <Suspense fallback={<CartPillSkeleton />}>
           <CartPill />
         </Suspense>
