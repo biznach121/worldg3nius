@@ -1,0 +1,258 @@
+@import "tailwindcss";
+
+@source "../node_modules/@cimplify/sdk/dist";
+
+/* WORLD G3NIUS — high-contrast streetwear palette with one electric hit. */
+@theme {
+  --color-background: oklch(0.99 0 0);
+  --color-foreground: oklch(0.12 0 0);
+  --color-card: oklch(1 0 0);
+  --color-card-foreground: oklch(0.12 0 0);
+  --color-popover: oklch(1 0 0);
+  --color-popover-foreground: oklch(0.12 0 0);
+  --color-primary: oklch(0.7 0.24 30);
+  --color-primary-foreground: oklch(0.99 0 0);
+  --color-secondary: oklch(0.96 0 0);
+  --color-secondary-foreground: oklch(0.18 0 0);
+  --color-muted: oklch(0.96 0 0);
+  --color-muted-foreground: oklch(0.45 0 0);
+  --color-accent: oklch(0.92 0 0);
+  --color-accent-foreground: oklch(0.18 0 0);
+  --color-destructive: oklch(0.58 0.24 27);
+  --color-destructive-foreground: oklch(0.99 0 0);
+  --color-border: oklch(0.9 0 0);
+  --color-input: oklch(0.93 0 0);
+  --color-ring: oklch(0.7 0.24 30);
+  --font-sans: var(--font-jersey-m54), Arial, sans-serif;
+  --font-display: var(--font-jersey-m54), Arial, sans-serif;
+  --font-serif: var(--font-jersey-m54), Arial, sans-serif;
+  --radius: 0.125rem;
+}
+
+@layer base {
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: var(--color-background);
+    color: var(--color-foreground);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  a { color: inherit; text-decoration: none; }
+  h1, h2, h3, h4 {
+    font-family: var(--font-display);
+    letter-spacing: 0;
+    font-weight: 400;
+    line-height: 0.95;
+  }
+}
+
+@layer utilities {
+  .wg-logo-button {
+    text-shadow:
+      0 3px 0 rgb(0 0 0 / 0.28),
+      0 28px 70px rgb(0 0 0 / 0.5);
+    transform: translateZ(0);
+  }
+
+  .wg-logo-button:hover .wg-logo-letter,
+  .wg-logo-button:focus-visible .wg-logo-letter {
+    -webkit-text-stroke-width: 1px;
+    -webkit-text-stroke-color: currentColor;
+    color: transparent;
+  }
+
+  .wg-logo-text {
+    position: relative;
+    display: block;
+    letter-spacing: 0;
+  }
+
+  .wg-logo-text::after {
+    content: attr(class);
+    display: none;
+  }
+
+  .wg-logo-letter {
+    display: inline-block;
+    transform-origin: 50% 62%;
+    animation: wg-letter-pop 3.9s cubic-bezier(0.22, 1, 0.36, 1) infinite;
+    animation-delay: calc(var(--letter-index) * 72ms);
+    will-change: transform, filter;
+  }
+
+  .wg-scanlines {
+    background-image: linear-gradient(
+      to bottom,
+      rgb(255 255 255 / 0.18) 0,
+      rgb(255 255 255 / 0.18) 1px,
+      transparent 1px,
+      transparent 9px
+    );
+    mix-blend-mode: overlay;
+    animation: wg-scan 9s linear infinite;
+  }
+
+  .wg-skeleton {
+    position: relative;
+    overflow: hidden;
+    background: oklch(0.9 0 0);
+  }
+
+  .wg-skeleton::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    transform: translateX(-100%);
+    background: linear-gradient(90deg, transparent, rgb(255 255 255 / 0.54), transparent);
+    animation: wg-shimmer 1.25s infinite;
+  }
+
+  .wg-typewriter {
+    display: inline-block;
+    width: 0;
+    max-width: 100%;
+    overflow: hidden;
+    white-space: nowrap;
+    border-right: 0.045em solid currentColor;
+    border-color: transparent;
+    animation-duration: 14.4s;
+    animation-iteration-count: infinite;
+    animation-timing-function: steps(var(--characters, 10), end);
+  }
+
+  .wg-typewriter-0 {
+    animation-name: wg-typewriter-one;
+  }
+
+  .wg-typewriter-1 {
+    animation-name: wg-typewriter-two;
+  }
+
+  .wg-typewriter-2 {
+    animation-name: wg-typewriter-three;
+  }
+}
+
+@keyframes wg-letter-pop {
+  0%,
+  68%,
+  100% {
+    transform: translateY(0) scale(1);
+    filter: drop-shadow(0 0 0 rgb(255 255 255 / 0));
+  }
+  8% {
+    transform: translateY(-0.075em) scale(1.045);
+    filter: drop-shadow(0 0 18px rgb(255 255 255 / 0.26));
+  }
+  16% {
+    transform: translateY(0.035em) scale(0.985);
+  }
+  24% {
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes wg-scan {
+  from {
+    background-position: 0 0;
+  }
+  to {
+    background-position: 0 90px;
+  }
+}
+
+@keyframes wg-scroll {
+  0% {
+    transform: translateY(-120%);
+  }
+  100% {
+    transform: translateY(240%);
+  }
+}
+
+@keyframes wg-shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes wg-typewriter-one {
+  0%,
+  3% {
+    width: 0;
+    border-color: currentColor;
+  }
+  13%,
+  31% {
+    width: min(100%, calc(var(--characters, 10) * 0.68em));
+    border-color: currentColor;
+  }
+  32%,
+  100% {
+    width: 0;
+    border-color: transparent;
+  }
+}
+
+@keyframes wg-typewriter-two {
+  0%,
+  31.99% {
+    width: 0;
+    border-color: transparent;
+  }
+  32%,
+  35% {
+    width: 0;
+    border-color: currentColor;
+  }
+  46%,
+  64% {
+    width: min(100%, calc(var(--characters, 10) * 0.68em));
+    border-color: currentColor;
+  }
+  65%,
+  100% {
+    width: 0;
+    border-color: transparent;
+  }
+}
+
+@keyframes wg-typewriter-three {
+  0%,
+  64.99% {
+    width: 0;
+    border-color: transparent;
+  }
+  65%,
+  68% {
+    width: 0;
+    border-color: currentColor;
+  }
+  79%,
+  97% {
+    width: min(100%, calc(var(--characters, 10) * 0.68em));
+    border-color: currentColor;
+  }
+  98%,
+  100% {
+    width: 0;
+    border-color: transparent;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  .wg-typewriter {
+    width: auto;
+    border-right: 0;
+  }
+}

@@ -1,0 +1,375 @@
+import type { Metadata } from "next";
+import Image from "next/image";
+import Link from "next/link";
+import { Suspense } from "react";
+import type { CSSProperties } from "react";
+import { getServerClient, tags, type Collection, type Product } from "@cimplify/sdk/server";
+import { CategoryTiles } from "@/components/category-tiles";
+import { CollectionStrip } from "@/components/collection-strip";
+import { PromoBanner } from "@/components/promo-banner";
+import { BrandMarquee } from "@/components/brand-marquee";
+import { TradeInCta } from "@/components/trade-in-cta";
+import { Newsletter } from "@/components/newsletter";
+import { SectionHeading } from "@/components/section-heading";
+import { StoreProductCard } from "@/components/store-product-card";
+import { WorldGeniusHero } from "@/components/world-genius-hero";
+import { brand } from "@/lib/brand";
+
+export const metadata: Metadata = {
+  title: "WORLD G3NIUS",
+  description: brand.description,
+};
+
+export const revalidate = 3600;
+
+interface CollectionWithProducts {
+  collection: Collection;
+  products: Product[];
+}
+
+async function getHomeData() {
+  const client = getServerClient();
+  const [colRes, catRes, productsRes] = await Promise.all([
+    client.catalogue.getCollections({
+      cacheOptions: { revalidate: 3600, tags: [tags.collections()] },
+    }),
+    client.catalogue.getCategories({
+      cacheOptions: { revalidate: 3600, tags: [tags.categories()] },
+    }),
+    client.catalogue.getProducts(
+      { limit: 12 },
+      { cacheOptions: { revalidate: 3600, tags: [tags.products()] } },
+    ),
+  ]);
+  const collections = colRes.ok ? colRes.value : [];
+  const categories = catRes.ok ? catRes.value : [];
+  const allProducts = productsRes.ok ? productsRes.value.items : [];
+
+  const collectionsWithProducts: CollectionWithProducts[] = await Promise.all(
+    collections.map(async (col) => {
+      const r = await client.catalogue.getCollectionProducts(
+        col.id,
+        undefined,
+        {
+          cacheOptions: {
+            revalidate: 3600,
+            tags: [tags.collectionProducts(col.id)],
+          },
+        },
+      );
+      const items = r.ok
+        ? ((r.value as { items?: Product[] }).items ?? (r.value as Product[]))
+        : [];
+      return { collection: col, products: items };
+    }),
+  );
+
+  return {
+    collections: collectionsWithProducts.filter((x) => x.products.length > 0),
+    categories,
+    featured: allProducts.slice(0, 4),
+    newArrivals: allProducts.slice(4, 12),
+  };
+}
+
+const SPLIT_IMAGES = [
+  {
+    src: "https://res.cloudinary.com/dcc5ggnkc/image/upload/v1780487795/mdk3hegmfalvep7b4iuw.png",
+    title: "Outerwear",
+    eyebrow: "01",
+  },
+  {
+    src: "https://res.cloudinary.com/dcc5ggnkc/image/upload/v1780488090/cplqhjp5g7n2fevyzftc.png",
+    title: "Graphic cuts",
+    eyebrow: "02",
+  },
+  {
+    src: "https://res.cloudinary.com/dcc5ggnkc/image/upload/v1780487772/joqwg0bxi6imuhrsexmg.png",
+    title: "Base layers",
+    eyebrow: "03",
+  },
+];
+
+const CAMPAIGN_IMAGES = [
+  "https://res.cloudinary.com/dcc5ggnkc/image/upload/v1780487915/qerbwdhglaeawnbejedx.png",
+  "https://res.cloudinary.com/dcc5ggnkc/image/upload/v1780488107/lf1dafvzwbbkrbbggcmp.png",
+];
+
+export default async function HomePage() {
+  const { collections, categories, featured, newArrivals } = await getHomeData();
+
+  return (
+    <>
+      <WorldGeniusHero />
+
+      <EditorialSplit />
+
+      <ProductSpotlight products={featured} />
+
+      <Suspense fallback={<CategoryTilesSkeleton />}>
+        <CategoryTiles categories={categories} />
+      </Suspense>
+
+      <PromoBanner />
+
+      <section className="max-w-7xl mx-auto px-6 sm:px-8 py-14 sm:py-20">
+        <SectionHeading
+          eyebrow="Just dropped"
+          title="New uniform."
+          description="Pieces built for heat, concrete, night movement, and the afters."
+          link={{ label: "Browse all", href: "/shop" }}
+        />
+        <Suspense fallback={<GridSkeleton count={4} />}>
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
+            {newArrivals.slice(0, 4).map((p) => (
+              <StoreProductCard key={p.id} product={p} />
+            ))}
+          </div>
+        </Suspense>
+      </section>
+
+      <BrandMarquee />
+
+      <CampaignStatement />
+
+      {collections.map(({ collection, products }) => (
+        <Suspense
+          key={collection.id}
+          fallback={<StripSkeleton title={collection.name} />}
+        >
+          <CollectionStrip
+            collection={collection}
+            products={products}
+            collectionHref={`/collections/${collection.slug}`}
+          />
+        </Suspense>
+      ))}
+
+      <TradeInCta />
+
+      <section className="max-w-7xl mx-auto px-6 sm:px-8 py-14 sm:py-20">
+        <SectionHeading
+          eyebrow="Best sellers"
+          title="Crowd approved."
+          link={{ label: "See more", href: "/shop" }}
+        />
+        <Suspense fallback={<GridSkeleton count={4} />}>
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
+            {newArrivals.slice(4, 8).map((p) => (
+              <StoreProductCard key={p.id} product={p} />
+            ))}
+          </div>
+        </Suspense>
+      </section>
+
+      <Newsletter />
+    </>
+  );
+}
+
+function EditorialSplit() {
+  return (
+    <section className="grid min-h-[100svh] grid-rows-3 bg-black text-white md:grid-cols-2 md:grid-rows-2">
+      <EditorialTile
+        src={SPLIT_IMAGES[0].src}
+        eyebrow={SPLIT_IMAGES[0].eyebrow}
+        title={SPLIT_IMAGES[0].title}
+        href="/shop"
+        typeIndex={0}
+        className="row-span-1 md:row-span-2"
+        priority
+      />
+      <EditorialTile
+        src={SPLIT_IMAGES[1].src}
+        eyebrow={SPLIT_IMAGES[1].eyebrow}
+        title={SPLIT_IMAGES[1].title}
+        href="/categories/tees"
+        typeIndex={1}
+      />
+      <EditorialTile
+        src={SPLIT_IMAGES[2].src}
+        eyebrow={SPLIT_IMAGES[2].eyebrow}
+        title={SPLIT_IMAGES[2].title}
+        href="/categories/new-arrivals"
+        typeIndex={2}
+      />
+    </section>
+  );
+}
+
+function EditorialTile({
+  src,
+  eyebrow,
+  title,
+  href,
+  typeIndex,
+  className = "",
+  priority = false,
+}: {
+  src: string;
+  eyebrow: string;
+  title: string;
+  href: string;
+  typeIndex: 0 | 1 | 2;
+  className?: string;
+  priority?: boolean;
+}) {
+  return (
+    <Link href={href} className={`group relative min-h-[33.333svh] overflow-hidden ${className}`}>
+      <Image
+        src={src}
+        alt={`World G3nius ${title}`}
+        fill
+        priority={priority}
+        sizes="(min-width: 768px) 50vw, 100vw"
+        className="object-cover transition-transform duration-[1600ms] ease-out group-hover:scale-105"
+      />
+      <div className="absolute inset-0 bg-gradient-to-t from-black/72 via-black/12 to-transparent transition-opacity group-hover:opacity-80" />
+      <div className="absolute bottom-0 left-0 right-0 flex items-end justify-between gap-4 p-5 sm:p-8">
+        <div>
+          <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.24em] text-white/70">
+            {eyebrow}
+          </p>
+          <h2
+            className={`wg-typewriter wg-typewriter-${typeIndex} m-0 font-display text-[clamp(2.75rem,7vw,6.5rem)] uppercase leading-[0.84]`}
+            style={{ "--characters": title.length } as CSSProperties}
+          >
+            {title}
+          </h2>
+        </div>
+        <span className="hidden border border-white/70 px-4 py-2 text-[11px] font-bold uppercase tracking-[0.16em] text-white transition-colors group-hover:bg-white group-hover:text-black sm:inline-flex">
+          Shop
+        </span>
+      </div>
+    </Link>
+  );
+}
+
+function ProductSpotlight({ products }: { products: Product[] }) {
+  if (products.length === 0) return null;
+
+  return (
+    <section className="border-y border-border bg-[oklch(0.975_0_0)] px-5 py-10 sm:px-8 sm:py-12">
+      <div className="mx-auto max-w-7xl">
+        <div className="mb-5 flex items-end justify-between gap-5">
+          <div>
+            <p className="mb-2 text-[11px] font-bold uppercase tracking-[0.22em] text-primary">
+              Shop the edit
+            </p>
+            <h2 className="m-0 font-display text-[clamp(2.4rem,5vw,4.75rem)] uppercase leading-[0.82]">
+              Four pieces. Full signal.
+            </h2>
+          </div>
+          <Link
+            href="/shop"
+            className="hidden border border-black px-5 py-3 text-[11px] font-bold uppercase tracking-[0.16em] text-black transition-colors hover:bg-black hover:text-white sm:inline-flex"
+          >
+            All products
+          </Link>
+        </div>
+        <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
+          {products.slice(0, 4).map((product) => (
+            <StoreProductCard key={product.id} product={product} />
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function CampaignStatement() {
+  return (
+    <section className="bg-white px-5 py-16 text-black sm:px-8 sm:py-24">
+      <div className="mx-auto grid max-w-7xl gap-5 lg:grid-cols-[0.82fr_1.18fr]">
+        <div className="flex flex-col justify-between gap-8 py-2">
+          <div>
+            <p className="mb-4 text-[11px] font-bold uppercase tracking-[0.26em] text-black/54">
+              World code
+            </p>
+            <h2 className="m-0 max-w-xl font-display text-[clamp(4rem,10vw,9.5rem)] uppercase leading-[0.82]">
+              Genius is a uniform.
+            </h2>
+          </div>
+          <div className="max-w-md">
+            <p className="text-base leading-7 text-black/72">
+              WORLD G3NIUS moves like a street label and edits like a magazine:
+              hard silhouettes, clean contrast, loud marks, zero apology.
+            </p>
+            <div className="mt-6 flex flex-wrap gap-3">
+              <Link
+                href="/lookbook"
+                className="inline-flex bg-black px-6 py-3 text-xs font-bold uppercase tracking-[0.16em] text-white transition-transform hover:-translate-y-0.5"
+              >
+                View lookbook
+              </Link>
+              <Link
+                href="/shop"
+                className="inline-flex border border-black px-6 py-3 text-xs font-bold uppercase tracking-[0.16em] text-black transition-colors hover:bg-black hover:text-white"
+              >
+                Shop men
+              </Link>
+            </div>
+          </div>
+        </div>
+        <div className="grid min-h-[70svh] gap-5 sm:grid-cols-2">
+          {CAMPAIGN_IMAGES.map((src, index) => (
+            <div
+              key={src}
+              className={[
+                "relative min-h-[58svh] overflow-hidden bg-muted",
+                index === 1 ? "sm:mt-16" : "",
+              ].join(" ")}
+            >
+              <Image
+                src={src}
+                alt={`World G3nius campaign editorial ${index + 1}`}
+                fill
+                sizes="(min-width: 1024px) 32vw, (min-width: 640px) 50vw, 100vw"
+                className="object-cover"
+              />
+              <div className="absolute inset-x-0 bottom-0 p-4 text-[11px] font-bold uppercase tracking-[0.2em] text-white mix-blend-difference">
+                Look 0{index + 4}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function CategoryTilesSkeleton() {
+  return (
+    <section className="max-w-7xl mx-auto px-6 sm:px-8 py-14 sm:py-20">
+      <div className="h-8 w-64 bg-muted rounded mb-8 animate-pulse" />
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4">
+        {Array.from({ length: 5 }).map((_, i) => (
+          <div key={i} className="h-40 bg-muted rounded-2xl animate-pulse" />
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function GridSkeleton({ count }: { count: number }) {
+  return (
+    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
+      {Array.from({ length: count }).map((_, i) => (
+        <div key={i} className="aspect-[4/3] bg-muted rounded-2xl animate-pulse" />
+      ))}
+    </div>
+  );
+}
+
+function StripSkeleton({ title }: { title: string }) {
+  return (
+    <section className="max-w-7xl mx-auto px-6 sm:px-8 py-12">
+      <h2 className="text-[26px] font-semibold m-0 mb-5">{title}</h2>
+      <div className="grid grid-flow-col auto-cols-[minmax(220px,1fr)] gap-4 overflow-x-auto pb-2">
+        {Array.from({ length: 5 }).map((_, i) => (
+          <div key={i} className="aspect-square bg-muted rounded-2xl animate-pulse" />
+        ))}
+      </div>
+    </section>
+  );
+}
