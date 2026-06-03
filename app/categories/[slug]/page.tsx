@@ -118,14 +118,7 @@ async function CategoryContent({
         </div>
       </section>
       <section className="max-w-7xl mx-auto px-6 sm:px-8 py-10 sm:py-12">
-        <ListingClient products={products} />
-        {products.length === 0 && (
-          <p className="text-center mt-8">
-            <Link href="/shop" className="text-primary font-semibold hover:underline">
-              ← Browse all products
-            </Link>
-          </p>
-        )}
+        <ListingClient products={products} categoryName={category.name} />
       </section>
     </>
   );

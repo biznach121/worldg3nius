@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import Image from "next/image";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { ProductSheet, useProduct, useCart } from "@cimplify/sdk/react";
+import { withProductImage } from "@/lib/product-images";
 
 /**
  * URL-driven product modal. Reads `?product=<slug>` and renders the SDK's
@@ -68,7 +69,7 @@ export function ProductModal() {
         </button>
         {product ? (
           <ProductSheet
-            product={product}
+            product={withProductImage(product)}
             onClose={close}
             onAddToCart={async (p, qty, options) => {
               await addItem(p, qty, options);
@@ -86,11 +87,11 @@ export function ProductModal() {
               />
             )}
             classNames={{
-              root: "p-6 sm:p-8 gap-4",
+              root: "wg-product-detail-page p-6 sm:p-8 gap-4 font-display",
               image: "rounded-2xl overflow-hidden -mx-6 sm:-mx-8 -mt-6 sm:-mt-8 mb-2",
               header: "flex items-baseline justify-between gap-4",
-              name: "font-serif text-2xl font-semibold m-0",
-              price: "text-lg font-semibold text-primary",
+              name: "font-display text-2xl uppercase leading-[0.88] font-normal m-0",
+              price: "text-lg font-semibold text-foreground",
               description: "text-sm text-muted-foreground leading-relaxed",
               customizer: "pt-2",
             }}

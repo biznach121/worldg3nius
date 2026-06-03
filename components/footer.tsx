@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { FooterWorldLogo } from "@/components/footer-world-logo";
 import { brand } from "@/lib/brand";
 
 const ICONS: Record<string, React.ReactNode> = {
@@ -55,9 +56,7 @@ export async function Footer() {
         <div className="grid gap-10 md:grid-cols-[1.4fr_repeat(4,1fr)]">
           <div>
             <div className="flex items-center gap-2.5 mb-4">
-              <span className="grid place-items-center w-8 h-8 rounded-md bg-primary text-primary-foreground text-[13px] font-bold font-mono">
-                {brand.shortName.charAt(0).toUpperCase()}
-              </span>
+              <FooterWorldLogo />
               <span className="text-background text-lg font-bold">
                 {brand.name}
               </span>

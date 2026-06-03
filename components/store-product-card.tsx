@@ -1,11 +1,13 @@
 "use client";
 
+import { useState } from "react";
 import Image from "next/image";
-import Link from "next/link";
-import { Price } from "@cimplify/sdk/react";
-import type { CardVariant } from "@cimplify/sdk/react";
+import { useRouter } from "next/navigation";
+import { Price, useCart, useCartDrawer } from "@cimplify/sdk/react";
+import type { AddToCartOptions, CardVariant } from "@cimplify/sdk/react";
 import type { CurrencyCode, Product, VariantView } from "@cimplify/sdk";
 import { brand } from "@/lib/brand";
+import { getProductImage } from "@/lib/product-images";
 
 const FALLBACK_SIZES = ["XS", "S", "M", "L", "XL"];
 const SIZE_ORDER = ["XXS", "XS", "S", "M", "L", "XL", "2XL", "3XL", "4XL"];
@@ -19,18 +21,6 @@ interface Props {
 type ProductWithVariantPreview = Product & {
   variants?: VariantView[];
 };
-
-function firstImage(product: Product): string | undefined {
-  return product.image_url || product.images?.[0];
-}
-
-function stripDescription(description?: string) {
-  if (!description) return "";
-  return description
-    .replace(/<[^>]*>/g, " ")
-    .replace(/\s+/g, " ")
-    .trim();
-}
 
 function normalizeSize(size: string) {
   return size.trim().toUpperCase();
@@ -68,39 +58,105 @@ function productSizes(product: ProductWithVariantPreview) {
   });
 }
 
+function variantSize(variant: VariantView) {
+  const displaySize = variant.display_attributes?.find((attr) =>
+    attr.axis_name.toLowerCase().includes("size"),
+  )?.value_name;
+  const axisSize = Object.entries(variant.axis_selections ?? {}).find(([axis]) =>
+    axis.toLowerCase().includes("size"),
+  )?.[1];
+  return displaySize || axisSize;
+}
+
+function findSizeVariant(product: ProductWithVariantPreview, size: string) {
+  const normalized = normalizeSize(size);
+  return product.variants?.find((variant) => {
+    const candidate = variantSize(variant);
+    return candidate && normalizeSize(candidate) === normalized;
+  });
+}
+
 /**
  * Fashion-first product card for WORLD G3NIUS. The product page remains the
  * source of truth for variant matching and cart payload assembly.
  */
 export function StoreProductCard({ product }: Props) {
+  const router = useRouter();
+  const { addItem } = useCart();
+  const { open } = useCartDrawer();
+  const [addingSize, setAddingSize] = useState<string | null>(null);
+  const [addedSize, setAddedSize] = useState<string | null>(null);
+  const [failedSize, setFailedSize] = useState<string | null>(null);
   const slug = product.slug || product.id;
   const href = `/products/${encodeURIComponent(slug)}`;
-  const image = firstImage(product);
-  const sizes = productSizes(product as ProductWithVariantPreview);
-  const description = stripDescription(product.description);
+  const image = getProductImage(product);
+  const productWithVariants = product as ProductWithVariantPreview;
+  const sizes = productSizes(productWithVariants);
   const inStock = product.inventory_status?.in_stock ?? true;
 
+  function goToDetails() {
+    router.push(href);
+  }
+
+  async function quickAddSize(size: string) {
+    const variant = findSizeVariant(productWithVariants, size);
+    const options: AddToCartOptions = variant
+      ? {
+          variantId: variant.id,
+          variant: {
+            id: variant.id,
+            name: variant.name || size,
+            price_adjustment: variant.price_adjustment,
+          },
+        }
+      : {};
+
+    setAddingSize(size);
+    setFailedSize(null);
+
+    try {
+      await addItem(product, 1, options);
+      setAddedSize(size);
+      open();
+      window.setTimeout(() => setAddedSize((current) => (current === size ? null : current)), 1600);
+    } catch {
+      setFailedSize(size);
+    } finally {
+      setAddingSize((current) => (current === size ? null : current));
+    }
+  }
+
   return (
-    <article className="group relative min-w-0 bg-white text-black">
-      <div className="relative overflow-hidden border border-black/10 bg-[oklch(0.94_0_0)]">
-        <Link href={href} className="block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary">
-          <div className="relative aspect-[4/5] overflow-hidden">
-            {image ? (
-              <Image
-                src={image}
-                alt={product.name}
-                fill
-                sizes="(min-width: 1024px) 25vw, (min-width: 768px) 33vw, 50vw"
-                className="object-cover transition duration-700 ease-out group-hover:scale-[1.045] group-hover:contrast-[1.04]"
-              />
-            ) : (
-              <div className="grid h-full place-items-center bg-black text-center font-display text-3xl uppercase leading-none text-white">
-                WG3
-              </div>
-            )}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/62 via-black/0 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100 group-focus-within:opacity-100" />
-          </div>
-        </Link>
+    <article
+      role="link"
+      tabIndex={0}
+      aria-label={`View ${product.name}`}
+      onClick={goToDetails}
+      onKeyDown={(event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          goToDetails();
+        }
+      }}
+      className="group relative flex h-full min-w-0 cursor-pointer flex-col bg-white text-black"
+    >
+      <div className="relative flex-none overflow-hidden border border-black/10 bg-[oklch(0.94_0_0)]">
+        <div className="relative aspect-[4/5] overflow-hidden">
+          {image ? (
+            <Image
+              src={image}
+              alt={product.name}
+              fill
+              sizes="(min-width: 1024px) 25vw, (min-width: 768px) 33vw, 50vw"
+              className="object-cover transition duration-700 ease-out group-hover:scale-[1.045] group-hover:contrast-[1.04]"
+            />
+          ) : (
+            <div className="grid h-full place-items-center bg-black text-center font-display text-3xl uppercase leading-none text-white">
+              WG3
+            </div>
+          )}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/62 via-black/0 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100 group-focus-within:opacity-100" />
+        </div>
 
         <div className="absolute left-3 top-3 flex flex-wrap gap-2">
           <span className="bg-white px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.16em] text-black shadow-sm">
@@ -120,53 +176,44 @@ export function StoreProductCard({ product }: Props) {
             </p>
             <div className="grid grid-cols-5 gap-1.5">
               {sizes.slice(0, 5).map((size) => (
-                <Link
+                <button
                   key={size}
-                  href={`${href}?size=${encodeURIComponent(size)}`}
-                  className="grid h-9 place-items-center border border-white/30 text-[11px] font-bold uppercase text-white transition-colors hover:border-white hover:bg-white hover:text-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
-                  aria-label={`View ${product.name} in size ${size}`}
+                  type="button"
+                  disabled={!inStock || addingSize === size}
+                  onClick={(event) => {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    void quickAddSize(size);
+                  }}
+                  onKeyDown={(event) => {
+                    event.stopPropagation();
+                  }}
+                  className="grid h-9 place-items-center border border-white/30 text-[11px] font-bold uppercase text-white transition-colors hover:border-white hover:bg-white hover:text-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white disabled:cursor-not-allowed disabled:opacity-45"
+                  aria-label={`Add ${product.name} in size ${size} to cart`}
                 >
-                  {size}
-                </Link>
+                  {addingSize === size ? "..." : addedSize === size ? "OK" : size}
+                </button>
               ))}
             </div>
+            {failedSize ? (
+              <p className="mt-2 text-[10px] uppercase tracking-[0.14em] text-white/70">
+                Open details for size {failedSize}
+              </p>
+            ) : null}
           </div>
         </div>
       </div>
 
-      <div className="grid gap-2 border-x border-b border-black/10 bg-white p-3 sm:p-4">
-        <div className="flex items-start justify-between gap-3">
-          <Link
-            href={href}
-            className="min-w-0 font-display text-[clamp(1.45rem,3vw,2rem)] uppercase leading-[0.86] transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
-          >
+      <div className="flex min-h-[5.75rem] flex-1 flex-col justify-center border-x border-b border-black/10 bg-white p-3 sm:min-h-[6.25rem] sm:p-4">
+        <div className="grid min-h-[4.4rem] grid-cols-[minmax(0,1fr)_auto] items-start gap-3">
+          <h3 className="m-0 line-clamp-2 min-w-0 font-display text-[1.55rem] uppercase leading-[0.88] transition-colors group-hover:text-foreground/70 sm:text-[1.8rem]">
             {product.name}
-          </Link>
+          </h3>
           <Price
             amount={product.default_price}
             currency={brand.currency as CurrencyCode}
             className="shrink-0 pt-0.5 text-sm font-black tabular-nums"
           />
-        </div>
-        {description ? (
-          <p className="line-clamp-2 min-h-[2.5rem] text-xs leading-5 text-black/58">
-            {description}
-          </p>
-        ) : (
-          <p className="min-h-[2.5rem] text-xs uppercase tracking-[0.14em] text-black/42">
-            Limited run street uniform.
-          </p>
-        )}
-        <div className="flex items-center justify-between border-t border-black/10 pt-3">
-          <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-black/45">
-            XS-2XL
-          </span>
-          <Link
-            href={href}
-            className="text-[11px] font-black uppercase tracking-[0.16em] text-black transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
-          >
-            View
-          </Link>
         </div>
       </div>
     </article>

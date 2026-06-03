@@ -170,10 +170,10 @@ export const brand: Brand = {
   },
 
   promo: {
-    badge: "Low stock",
-    title: "The WORLD G3NIUS uniform is online.",
-    body: "Oversized cuts, graphic codes, heavyweight cotton, and silhouettes that look good from across the street.",
-    ctaLabel: "Shop the system",
+    badge: "New drop",
+    title: "Fresh pieces just landed.",
+    body: "Jerseys, tees, bags, caps, and the uniform codes built for the next move.",
+    ctaLabel: "Shop the drop",
     ctaHref: "/shop",
   },
 

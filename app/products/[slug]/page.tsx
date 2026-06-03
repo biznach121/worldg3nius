@@ -11,6 +11,7 @@ import {
 import { ProductDetail } from "./product-detail";
 import { brand } from "@/lib/brand";
 import { getSiteUrl } from "@/lib/site-url";
+import { getProductImage } from "@/lib/product-images";
 
 // Pre-enumerate every product slug at build time so Next can emit cacheable
 // responses (s-maxage instead of no-store) for the route. Without this, every
@@ -28,7 +29,7 @@ export async function generateStaticParams() {
 export const revalidate = 3600;
 
 function productLd(product: ProductWithDetails, SITE_URL: string) {
-  const image = product.image_url ?? product.images?.[0];
+  const image = getProductImage(product);
   const inStock = product.inventory_status?.in_stock !== false;
   return {
     "@context": "https://schema.org",
@@ -106,7 +107,7 @@ export async function generateMetadata({
   const result = await getProduct(slug);
   if (!result.ok) return {};
   const { product } = result.data;
-  const image = product.image_url ?? product.images?.[0];
+  const image = getProductImage(product);
   return {
     title: `${product.name} — ${brand.name}`,
     description: product.description ?? undefined,

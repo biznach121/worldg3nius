@@ -4,6 +4,7 @@ import Image from "next/image";
 import { ProductPage as SdkProductPage, useCart } from "@cimplify/sdk/react";
 import type { Product, ProductWithDetails } from "@cimplify/sdk";
 import { StoreProductCard } from "@/components/store-product-card";
+import { withProductImage } from "@/lib/product-images";
 
 /**
  * Client island for the product detail page.
@@ -23,11 +24,12 @@ export function ProductDetail({
   related: Product[];
 }) {
   const { addItem } = useCart();
+  const displayProduct = withProductImage(product);
 
   return (
     <>
       <SdkProductPage
-        product={product}
+        product={displayProduct}
         showRelated={false}
         onAddToCart={async (p, qty, options) => {
           await addItem(p, qty, options);
@@ -43,14 +45,14 @@ export function ProductDetail({
             priority
           />
         )}
-        className="max-w-7xl mx-auto px-6 sm:px-8 py-8 sm:py-10"
+        className="wg-product-detail-page max-w-7xl mx-auto px-6 sm:px-8 py-8 sm:py-10 font-display"
       />
 
       {related.length > 0 && (
         <section className="max-w-7xl mx-auto px-6 sm:px-8 py-14 sm:py-16 border-t border-border mt-8">
           <div className="flex items-end justify-between gap-6 mb-8">
             <div>
-              <p className="text-[11px] font-mono uppercase tracking-[0.16em] text-primary mb-2">
+              <p className="text-[11px] font-display uppercase tracking-[0.16em] text-foreground mb-2">
                 You may also like
               </p>
               <h2 className="text-[clamp(1.5rem,2.5vw,2rem)] font-bold m-0">

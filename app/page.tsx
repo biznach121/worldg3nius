@@ -2,16 +2,20 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { Suspense } from "react";
-import type { CSSProperties } from "react";
-import { getServerClient, tags, type Collection, type Product } from "@cimplify/sdk/server";
-import { CategoryTiles } from "@/components/category-tiles";
+import {
+  getServerClient,
+  tags,
+  type Category,
+  type Collection,
+  type Product,
+} from "@cimplify/sdk/server";
 import { CollectionStrip } from "@/components/collection-strip";
 import { PromoBanner } from "@/components/promo-banner";
 import { BrandMarquee } from "@/components/brand-marquee";
-import { TradeInCta } from "@/components/trade-in-cta";
 import { Newsletter } from "@/components/newsletter";
 import { SectionHeading } from "@/components/section-heading";
 import { StoreProductCard } from "@/components/store-product-card";
+import { EditorialSlideShow } from "@/components/editorial-slide-show";
 import { WorldGeniusHero } from "@/components/world-genius-hero";
 import { brand } from "@/lib/brand";
 
@@ -42,7 +46,7 @@ async function getHomeData() {
     ),
   ]);
   const collections = colRes.ok ? colRes.value : [];
-  const categories = catRes.ok ? catRes.value : [];
+  const categories: Category[] = catRes.ok ? catRes.value : [];
   const allProducts = productsRes.ok ? productsRes.value.items : [];
 
   const collectionsWithProducts: CollectionWithProducts[] = await Promise.all(
@@ -72,24 +76,6 @@ async function getHomeData() {
   };
 }
 
-const SPLIT_IMAGES = [
-  {
-    src: "https://res.cloudinary.com/dcc5ggnkc/image/upload/v1780487795/mdk3hegmfalvep7b4iuw.png",
-    title: "Outerwear",
-    eyebrow: "01",
-  },
-  {
-    src: "https://res.cloudinary.com/dcc5ggnkc/image/upload/v1780488090/cplqhjp5g7n2fevyzftc.png",
-    title: "Graphic cuts",
-    eyebrow: "02",
-  },
-  {
-    src: "https://res.cloudinary.com/dcc5ggnkc/image/upload/v1780487772/joqwg0bxi6imuhrsexmg.png",
-    title: "Base layers",
-    eyebrow: "03",
-  },
-];
-
 const CAMPAIGN_IMAGES = [
   "https://res.cloudinary.com/dcc5ggnkc/image/upload/v1780487915/qerbwdhglaeawnbejedx.png",
   "https://res.cloudinary.com/dcc5ggnkc/image/upload/v1780488107/lf1dafvzwbbkrbbggcmp.png",
@@ -97,18 +83,17 @@ const CAMPAIGN_IMAGES = [
 
 export default async function HomePage() {
   const { collections, categories, featured, newArrivals } = await getHomeData();
+  const dropCollection =
+    collections.find(({ collection }) => /drop\s*04|drop/i.test(collection.name)) ??
+    collections[0];
 
   return (
     <>
       <WorldGeniusHero />
 
-      <EditorialSplit />
+      <EditorialSlideShow categories={categories} />
 
       <ProductSpotlight products={featured} />
-
-      <Suspense fallback={<CategoryTilesSkeleton />}>
-        <CategoryTiles categories={categories} />
-      </Suspense>
 
       <PromoBanner />
 
@@ -132,116 +117,21 @@ export default async function HomePage() {
 
       <CampaignStatement />
 
-      {collections.map(({ collection, products }) => (
+      {dropCollection ? (
         <Suspense
-          key={collection.id}
-          fallback={<StripSkeleton title={collection.name} />}
+          key={dropCollection.collection.id}
+          fallback={<StripSkeleton title={dropCollection.collection.name} />}
         >
           <CollectionStrip
-            collection={collection}
-            products={products}
-            collectionHref={`/collections/${collection.slug}`}
+            collection={dropCollection.collection}
+            products={dropCollection.products}
+            collectionHref={`/collections/${dropCollection.collection.slug ?? dropCollection.collection.id}`}
           />
         </Suspense>
-      ))}
-
-      <TradeInCta />
-
-      <section className="max-w-7xl mx-auto px-6 sm:px-8 py-14 sm:py-20">
-        <SectionHeading
-          eyebrow="Best sellers"
-          title="Crowd approved."
-          link={{ label: "See more", href: "/shop" }}
-        />
-        <Suspense fallback={<GridSkeleton count={4} />}>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
-            {newArrivals.slice(4, 8).map((p) => (
-              <StoreProductCard key={p.id} product={p} />
-            ))}
-          </div>
-        </Suspense>
-      </section>
+      ) : null}
 
       <Newsletter />
     </>
-  );
-}
-
-function EditorialSplit() {
-  return (
-    <section className="grid min-h-[100svh] grid-rows-3 bg-black text-white md:grid-cols-2 md:grid-rows-2">
-      <EditorialTile
-        src={SPLIT_IMAGES[0].src}
-        eyebrow={SPLIT_IMAGES[0].eyebrow}
-        title={SPLIT_IMAGES[0].title}
-        href="/shop"
-        typeIndex={0}
-        className="row-span-1 md:row-span-2"
-        priority
-      />
-      <EditorialTile
-        src={SPLIT_IMAGES[1].src}
-        eyebrow={SPLIT_IMAGES[1].eyebrow}
-        title={SPLIT_IMAGES[1].title}
-        href="/categories/tees"
-        typeIndex={1}
-      />
-      <EditorialTile
-        src={SPLIT_IMAGES[2].src}
-        eyebrow={SPLIT_IMAGES[2].eyebrow}
-        title={SPLIT_IMAGES[2].title}
-        href="/categories/new-arrivals"
-        typeIndex={2}
-      />
-    </section>
-  );
-}
-
-function EditorialTile({
-  src,
-  eyebrow,
-  title,
-  href,
-  typeIndex,
-  className = "",
-  priority = false,
-}: {
-  src: string;
-  eyebrow: string;
-  title: string;
-  href: string;
-  typeIndex: 0 | 1 | 2;
-  className?: string;
-  priority?: boolean;
-}) {
-  return (
-    <Link href={href} className={`group relative min-h-[33.333svh] overflow-hidden ${className}`}>
-      <Image
-        src={src}
-        alt={`World G3nius ${title}`}
-        fill
-        priority={priority}
-        sizes="(min-width: 768px) 50vw, 100vw"
-        className="object-cover transition-transform duration-[1600ms] ease-out group-hover:scale-105"
-      />
-      <div className="absolute inset-0 bg-gradient-to-t from-black/72 via-black/12 to-transparent transition-opacity group-hover:opacity-80" />
-      <div className="absolute bottom-0 left-0 right-0 flex items-end justify-between gap-4 p-5 sm:p-8">
-        <div>
-          <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.24em] text-white/70">
-            {eyebrow}
-          </p>
-          <h2
-            className={`wg-typewriter wg-typewriter-${typeIndex} m-0 font-display text-[clamp(2.75rem,7vw,6.5rem)] uppercase leading-[0.84]`}
-            style={{ "--characters": title.length } as CSSProperties}
-          >
-            {title}
-          </h2>
-        </div>
-        <span className="hidden border border-white/70 px-4 py-2 text-[11px] font-bold uppercase tracking-[0.16em] text-white transition-colors group-hover:bg-white group-hover:text-black sm:inline-flex">
-          Shop
-        </span>
-      </div>
-    </Link>
   );
 }
 
@@ -338,19 +228,6 @@ function CampaignStatement() {
   );
 }
 
-function CategoryTilesSkeleton() {
-  return (
-    <section className="max-w-7xl mx-auto px-6 sm:px-8 py-14 sm:py-20">
-      <div className="h-8 w-64 bg-muted rounded mb-8 animate-pulse" />
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4">
-        {Array.from({ length: 5 }).map((_, i) => (
-          <div key={i} className="h-40 bg-muted rounded-2xl animate-pulse" />
-        ))}
-      </div>
-    </section>
-  );
-}
-
 function GridSkeleton({ count }: { count: number }) {
   return (
     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
@@ -365,8 +242,8 @@ function StripSkeleton({ title }: { title: string }) {
   return (
     <section className="max-w-7xl mx-auto px-6 sm:px-8 py-12">
       <h2 className="text-[26px] font-semibold m-0 mb-5">{title}</h2>
-      <div className="grid grid-flow-col auto-cols-[minmax(220px,1fr)] gap-4 overflow-x-auto pb-2">
-        {Array.from({ length: 5 }).map((_, i) => (
+      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+        {Array.from({ length: 4 }).map((_, i) => (
           <div key={i} className="aspect-square bg-muted rounded-2xl animate-pulse" />
         ))}
       </div>

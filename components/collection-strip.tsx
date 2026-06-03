@@ -22,7 +22,7 @@ export function CollectionStrip({ collection, products, collectionHref }: Collec
         {collectionHref && (
           <Link
             href={collectionHref}
-            className="text-[13px] font-semibold text-primary hover:underline"
+            className="text-[13px] font-semibold text-black transition-opacity hover:opacity-60"
           >
             See all →
           </Link>
@@ -33,9 +33,9 @@ export function CollectionStrip({ collection, products, collectionHref }: Collec
           </p>
         )}
       </header>
-      <div className="grid grid-flow-col auto-cols-[minmax(220px,1fr)] gap-4 overflow-x-auto snap-x snap-mandatory pb-2">
-        {products.slice(0, 8).map((p) => (
-          <div key={p.id} className="snap-start">
+      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+        {products.slice(0, 4).map((p) => (
+          <div key={p.id} className="h-full min-w-0">
             <StoreProductCard product={p} />
           </div>
         ))}

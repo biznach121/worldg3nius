@@ -11,7 +11,7 @@ export function SectionHeading({ eyebrow, title, description, link }: SectionHea
   return (
     <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 sm:gap-6 mb-6 sm:mb-8">
       <div className="max-w-2xl">
-        <p className="text-[11px] font-mono uppercase tracking-[0.16em] text-primary mb-2">
+        <p className="text-[11px] font-mono uppercase tracking-[0.16em] text-foreground/55 mb-2">
           {eyebrow}
         </p>
         <h2 className="text-[clamp(1.75rem,3vw,2.25rem)] font-bold m-0">
@@ -24,7 +24,7 @@ export function SectionHeading({ eyebrow, title, description, link }: SectionHea
       {link && (
         <Link
           href={link.href}
-          className="text-sm font-semibold text-primary hover:underline whitespace-nowrap inline-flex items-center gap-1 self-start sm:self-auto"
+          className="text-sm font-semibold text-foreground hover:underline whitespace-nowrap inline-flex items-center gap-1 self-start sm:self-auto"
         >
           {link.label}
           <svg viewBox="0 0 12 12" className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>

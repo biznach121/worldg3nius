@@ -170,7 +170,7 @@ export function WorldGeniusHero() {
           <LogoLine text="G3NIUS" offset={5} />
         </Link>
         <p className="mt-7 max-w-xl text-sm font-medium uppercase tracking-[0.18em] text-white/84 sm:text-base">
-          Cut loud. Built clean. Made for motion.
+          WORLD IN OUR EYES.
         </p>
       </div>
 

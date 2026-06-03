@@ -7,6 +7,7 @@ import { Footer } from "@/components/footer";
 import { ProductModal } from "@/components/product-modal";
 import { CartDrawer } from "@/components/cart-drawer";
 import { OrganizationJsonLd } from "@/components/json-ld";
+import { StickyWorldLogo } from "@/components/sticky-world-logo";
 import { Suspense } from "react";
 import { brand } from "@/lib/brand";
 import { getSiteUrl } from "@/lib/site-url";
@@ -49,6 +50,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         </Suspense>
         <Providers>
           <Header />
+          <StickyWorldLogo />
           <main className="flex-1 pb-12 w-full">
             <Suspense fallback={null}>{children}</Suspense>
           </main>

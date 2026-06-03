@@ -18,10 +18,10 @@ export function CartPill() {
       onClick={open}
       aria-label={`Open cart, ${count} ${count === 1 ? "item" : "items"}`}
       title={`Open cart, ${count} ${count === 1 ? "item" : "items"}`}
-      className="relative inline-grid h-10 w-10 place-items-center rounded-full bg-foreground text-background transition-transform hover:scale-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary cursor-pointer"
+      className="relative inline-grid h-10 w-10 place-items-center rounded-full bg-transparent text-current transition-transform hover:scale-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground cursor-pointer"
     >
       <CartIcon />
-      <span className="absolute -right-1 -top-1 grid h-5 min-w-5 place-items-center rounded-full border border-background bg-primary px-1 text-[10px] font-bold leading-none text-primary-foreground tabular-nums">
+      <span className="absolute -right-1 -top-1 grid h-5 min-w-5 place-items-center rounded-full border border-background bg-foreground px-1 text-[10px] font-bold leading-none text-background tabular-nums">
         {count}
       </span>
     </button>
@@ -32,10 +32,10 @@ export function CartPillSkeleton() {
   return (
     <span
       aria-hidden
-      className="relative inline-grid h-10 w-10 place-items-center rounded-full bg-foreground/80 text-background"
+      className="relative inline-grid h-10 w-10 place-items-center rounded-full bg-transparent text-current"
     >
       <CartIcon />
-      <span className="absolute -right-1 -top-1 h-5 min-w-5 rounded-full border border-background bg-primary/80" />
+      <span className="absolute -right-1 -top-1 h-5 min-w-5 rounded-full border border-background bg-foreground/80" />
     </span>
   );
 }
