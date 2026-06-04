@@ -64,7 +64,8 @@ export function MobileNav() {
           <nav
             id="mobile-nav-drawer"
             aria-label="Mobile navigation"
-            className="absolute inset-y-0 right-0 flex w-[86%] max-w-sm flex-col border-l border-border bg-background shadow-2xl"
+            className="absolute inset-y-0 right-0 z-10 flex w-[86%] max-w-sm flex-col border-l border-border bg-background text-foreground shadow-2xl"
+            style={{ backgroundColor: "var(--color-background)" }}
           >
             <div className="flex items-center justify-between px-6 py-4 border-b border-border">
               <span className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
