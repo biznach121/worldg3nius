@@ -1,6 +1,12 @@
 import type { MetadataRoute } from "next";
 import { getServerClient, type Product } from "@cimplify/sdk/server";
 import { getSiteUrl } from "@/lib/site-url";
+import {
+  demoCategories,
+  demoCollections,
+  demoProducts,
+  shouldUseDemoCatalogue,
+} from "@/lib/demo-catalogue";
 
 const STATIC_ROUTES: { path: string; priority: number; changeFrequency: "daily" | "weekly" | "monthly" }[] = [
   { path: "/", priority: 1.0, changeFrequency: "daily" },
@@ -14,6 +20,17 @@ const STATIC_ROUTES: { path: string; priority: number; changeFrequency: "daily" 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const now = new Date();
   const siteUrl = await getSiteUrl();
+
+  if (shouldUseDemoCatalogue()) {
+    return buildSitemap({
+      now,
+      siteUrl,
+      products: demoProducts,
+      categories: demoCategories,
+      collections: demoCollections,
+    });
+  }
+
   const client = getServerClient();
 
   const [productsRes, categoriesRes, collectionsRes] = await Promise.all([
@@ -26,6 +43,22 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const categories = categoriesRes.ok ? categoriesRes.value : [];
   const collections = collectionsRes.ok ? collectionsRes.value : [];
 
+  return buildSitemap({ now, siteUrl, products, categories, collections });
+}
+
+function buildSitemap({
+  now,
+  siteUrl,
+  products,
+  categories,
+  collections,
+}: {
+  now: Date;
+  siteUrl: string;
+  products: Product[];
+  categories: { slug?: string; id: string }[];
+  collections: { slug?: string; id: string }[];
+}) {
   const staticEntries: MetadataRoute.Sitemap = STATIC_ROUTES.map((r) => ({
     url: `${siteUrl}${r.path}`,
     lastModified: now,
@@ -41,14 +74,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   }));
 
   const categoryEntries: MetadataRoute.Sitemap = categories.map((c) => ({
-    url: `${siteUrl}/categories/${c.slug}`,
+    url: `${siteUrl}/categories/${c.slug ?? c.id}`,
     lastModified: now,
     changeFrequency: "weekly",
     priority: 0.6,
   }));
 
   const collectionEntries: MetadataRoute.Sitemap = collections.map((c) => ({
-    url: `${siteUrl}/collections/${c.slug}`,
+    url: `${siteUrl}/collections/${c.slug ?? c.id}`,
     lastModified: now,
     changeFrequency: "weekly",
     priority: 0.6,

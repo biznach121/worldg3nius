@@ -12,6 +12,12 @@ import { ProductDetail } from "./product-detail";
 import { brand } from "@/lib/brand";
 import { getSiteUrl } from "@/lib/site-url";
 import { getProductImage } from "@/lib/product-images";
+import {
+  demoProducts,
+  getDemoProductBySlug,
+  getDemoRelatedProducts,
+  shouldUseDemoCatalogue,
+} from "@/lib/demo-catalogue";
 
 // Pre-enumerate every product slug at build time so Next can emit cacheable
 // responses (s-maxage instead of no-store) for the route. Without this, every
@@ -19,6 +25,10 @@ import { getProductImage } from "@/lib/product-images";
 // fallback keeps the build alive if the catalogue API isn't reachable at
 // build time; the page handler already calls notFound() on unknown slugs.
 export async function generateStaticParams() {
+  if (shouldUseDemoCatalogue()) {
+    return demoProducts.map((p) => ({ slug: p.slug ?? p.id }));
+  }
+
   const r = await getServerClient().catalogue.getProducts({ limit: 10_000 });
   if (!r.ok || r.value.items.length === 0) {
     return [{ slug: "__placeholder__" }];
@@ -61,6 +71,18 @@ type ProductResult =
   | { ok: false; code: string };
 
 async function getProduct(slug: string): Promise<ProductResult> {
+  if (shouldUseDemoCatalogue()) {
+    const product = getDemoProductBySlug(slug);
+    if (!product) return { ok: false, code: "NOT_FOUND" };
+    return {
+      ok: true,
+      data: {
+        product,
+        related: getDemoRelatedProducts(product),
+      },
+    };
+  }
+
   const client = getServerClient();
   const r = await client.catalogue.getProductBySlug(slug, {
     cacheOptions: {

@@ -2,6 +2,12 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { getServerClient, tags, type Product } from "@cimplify/sdk/server";
 import { brand } from "@/lib/brand";
+import {
+  demoCategories,
+  demoCollections,
+  demoProducts,
+  shouldUseDemoCatalogue,
+} from "@/lib/demo-catalogue";
 
 export const metadata: Metadata = {
   title: `Sitemap — ${brand.name}`,
@@ -17,6 +23,17 @@ interface SitemapData {
 }
 
 async function getSitemap(): Promise<SitemapData> {
+  if (shouldUseDemoCatalogue()) {
+    return {
+      products: demoProducts.map((p) => ({
+        slug: p.slug ?? p.id,
+        name: p.name,
+      })),
+      categories: demoCategories.map((c) => ({ slug: c.slug ?? c.id, name: c.name })),
+      collections: demoCollections.map((c) => ({ slug: c.slug ?? c.id, name: c.name })),
+    };
+  }
+
   const client = getServerClient();
   const [pRes, cRes, colRes] = await Promise.all([
     client.catalogue.getProducts(

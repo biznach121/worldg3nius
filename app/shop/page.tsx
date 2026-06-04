@@ -3,6 +3,7 @@ import { Suspense } from "react";
 import { getServerClient, tags } from "@cimplify/sdk/server";
 import { ShopClient } from "./shop-client";
 import { brand } from "@/lib/brand";
+import { demoCategories, demoProducts, shouldUseDemoCatalogue } from "@/lib/demo-catalogue";
 
 export const metadata: Metadata = {
   title: `Shop — ${brand.name}`,
@@ -12,6 +13,13 @@ export const metadata: Metadata = {
 export const revalidate = 3600;
 
 async function getShopData() {
+  if (shouldUseDemoCatalogue()) {
+    return {
+      products: demoProducts,
+      categories: demoCategories,
+    };
+  }
+
   const client = getServerClient();
   const [p, c] = await Promise.all([
     client.catalogue.getProducts(

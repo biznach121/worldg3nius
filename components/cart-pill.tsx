@@ -2,6 +2,8 @@
 
 import { useCartDrawer } from "@cimplify/sdk/react";
 import { useCartCount } from "@/lib/cart";
+import { openDemoCartDrawer, useDemoCart } from "@/lib/demo-cart";
+import { shouldUseDemoCatalogue } from "@/lib/demo-catalogue";
 
 /**
  * Cart pill — dynamic island. Reads the live cart count via the SDK and
@@ -10,12 +12,25 @@ import { useCartCount } from "@/lib/cart";
  * header chrome streams without blocking on the cart fetch.
  */
 export function CartPill() {
+  return shouldUseDemoCatalogue() ? <DemoCartPill /> : <LiveCartPill />;
+}
+
+function LiveCartPill() {
   const { count } = useCartCount();
   const { open } = useCartDrawer();
+  return <CartButton count={count} onClick={open} />;
+}
+
+function DemoCartPill() {
+  const { count } = useDemoCart();
+  return <CartButton count={count} onClick={openDemoCartDrawer} />;
+}
+
+function CartButton({ count, onClick }: { count: number; onClick: () => void }) {
   return (
     <button
       type="button"
-      onClick={open}
+      onClick={onClick}
       aria-label={`Open cart, ${count} ${count === 1 ? "item" : "items"}`}
       title={`Open cart, ${count} ${count === 1 ? "item" : "items"}`}
       className="relative inline-grid h-10 w-10 place-items-center rounded-full bg-transparent text-current transition-transform hover:scale-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground cursor-pointer"

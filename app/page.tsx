@@ -18,6 +18,13 @@ import { StoreProductCard } from "@/components/store-product-card";
 import { EditorialSlideShow } from "@/components/editorial-slide-show";
 import { WorldGeniusHero } from "@/components/world-genius-hero";
 import { brand } from "@/lib/brand";
+import {
+  demoCategories,
+  demoCollections,
+  demoProducts,
+  getDemoProductsByCollection,
+  shouldUseDemoCatalogue,
+} from "@/lib/demo-catalogue";
 
 export const metadata: Metadata = {
   title: "WORLD G3NIUS",
@@ -32,6 +39,20 @@ interface CollectionWithProducts {
 }
 
 async function getHomeData() {
+  if (shouldUseDemoCatalogue()) {
+    const collectionsWithProducts = demoCollections.map((collection) => ({
+      collection,
+      products: getDemoProductsByCollection(collection.id),
+    }));
+
+    return {
+      collections: collectionsWithProducts.filter((x) => x.products.length > 0),
+      categories: demoCategories,
+      featured: demoProducts.slice(0, 4),
+      newArrivals: demoProducts.slice(4, 12),
+    };
+  }
+
   const client = getServerClient();
   const [colRes, catRes, productsRes] = await Promise.all([
     client.catalogue.getCollections({

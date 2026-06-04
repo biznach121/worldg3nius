@@ -7,6 +7,8 @@ import { Price, useCart, useCartDrawer } from "@cimplify/sdk/react";
 import type { AddToCartOptions, CardVariant } from "@cimplify/sdk/react";
 import type { CurrencyCode, Product, VariantView } from "@cimplify/sdk";
 import { brand } from "@/lib/brand";
+import { addDemoCartItem, openDemoCartDrawer } from "@/lib/demo-cart";
+import { shouldUseDemoCatalogue } from "@/lib/demo-catalogue";
 import { getProductImage } from "@/lib/product-images";
 
 const FALLBACK_SIZES = ["XS", "S", "M", "L", "XL"];
@@ -81,22 +83,41 @@ function findSizeVariant(product: ProductWithVariantPreview, size: string) {
  * source of truth for variant matching and cart payload assembly.
  */
 export function StoreProductCard({ product }: Props) {
-  const router = useRouter();
+  return shouldUseDemoCatalogue() ? (
+    <DemoStoreProductCard product={product} />
+  ) : (
+    <LiveStoreProductCard product={product} />
+  );
+}
+
+function DemoStoreProductCard({ product }: Props) {
+  const [addedSize, setAddedSize] = useState<string | null>(null);
+
+  async function quickAddSize(size: string) {
+    addDemoCartItem(product, 1, size);
+    setAddedSize(size);
+    openDemoCartDrawer();
+    window.setTimeout(() => setAddedSize((current) => (current === size ? null : current)), 1600);
+  }
+
+  return (
+    <ProductCardContent
+      product={product}
+      addingSize={null}
+      addedSize={addedSize}
+      failedSize={null}
+      quickAddSize={quickAddSize}
+    />
+  );
+}
+
+function LiveStoreProductCard({ product }: Props) {
   const { addItem } = useCart();
   const { open } = useCartDrawer();
   const [addingSize, setAddingSize] = useState<string | null>(null);
   const [addedSize, setAddedSize] = useState<string | null>(null);
   const [failedSize, setFailedSize] = useState<string | null>(null);
-  const slug = product.slug || product.id;
-  const href = `/products/${encodeURIComponent(slug)}`;
-  const image = getProductImage(product);
   const productWithVariants = product as ProductWithVariantPreview;
-  const sizes = productSizes(productWithVariants);
-  const inStock = product.inventory_status?.in_stock ?? true;
-
-  function goToDetails() {
-    router.push(href);
-  }
 
   async function quickAddSize(size: string) {
     const variant = findSizeVariant(productWithVariants, size);
@@ -124,6 +145,41 @@ export function StoreProductCard({ product }: Props) {
     } finally {
       setAddingSize((current) => (current === size ? null : current));
     }
+  }
+
+  return (
+    <ProductCardContent
+      product={product}
+      addingSize={addingSize}
+      addedSize={addedSize}
+      failedSize={failedSize}
+      quickAddSize={quickAddSize}
+    />
+  );
+}
+
+function ProductCardContent({
+  product,
+  addingSize,
+  addedSize,
+  failedSize,
+  quickAddSize,
+}: Props & {
+  addingSize: string | null;
+  addedSize: string | null;
+  failedSize: string | null;
+  quickAddSize: (size: string) => Promise<void>;
+}) {
+  const router = useRouter();
+  const slug = product.slug || product.id;
+  const href = `/products/${encodeURIComponent(slug)}`;
+  const image = getProductImage(product);
+  const productWithVariants = product as ProductWithVariantPreview;
+  const sizes = productSizes(productWithVariants);
+  const inStock = product.inventory_status?.in_stock ?? true;
+
+  function goToDetails() {
+    router.push(href);
   }
 
   return (

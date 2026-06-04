@@ -2,8 +2,11 @@
 
 import Image from "next/image";
 import { ProductPage as SdkProductPage, useCart } from "@cimplify/sdk/react";
+import type { AddToCartOptions } from "@cimplify/sdk/react";
 import type { Product, ProductWithDetails } from "@cimplify/sdk";
 import { StoreProductCard } from "@/components/store-product-card";
+import { addDemoCartItem, openDemoCartDrawer } from "@/lib/demo-cart";
+import { shouldUseDemoCatalogue } from "@/lib/demo-catalogue";
 import { withProductImage } from "@/lib/product-images";
 
 /**
@@ -12,7 +15,7 @@ import { withProductImage } from "@/lib/product-images";
  * - Receives a server-fetched `ProductWithDetails` (no client refetch).
  * - Renders the SDK `<ProductPage>` which picks the right layout
  *   (Default / Wholesale / Service / Bundle / Composite) automatically.
- * - On add-to-cart success, routes to `/cart`.
+ * - On add-to-cart success, opens the side cart drawer.
  * - Custom Next.js Image renderer for optimised, lazy-loaded gallery shots.
  * - Renders a "You may also like" rail of in-category products below.
  */
@@ -23,7 +26,65 @@ export function ProductDetail({
   product: ProductWithDetails;
   related: Product[];
 }) {
+  return shouldUseDemoCatalogue() ? (
+    <DemoProductDetail product={product} related={related} />
+  ) : (
+    <LiveProductDetail product={product} related={related} />
+  );
+}
+
+function DemoProductDetail({
+  product,
+  related,
+}: {
+  product: ProductWithDetails;
+  related: Product[];
+}) {
+  return (
+    <ProductDetailView
+      product={product}
+      related={related}
+      onAddToCart={async (p, qty, options) => {
+        const variantName = options && "variant" in options ? options.variant?.name : undefined;
+        addDemoCartItem(p, qty, variantName);
+        openDemoCartDrawer();
+      }}
+    />
+  );
+}
+
+function LiveProductDetail({
+  product,
+  related,
+}: {
+  product: ProductWithDetails;
+  related: Product[];
+}) {
   const { addItem } = useCart();
+  return (
+    <ProductDetailView
+      product={product}
+      related={related}
+      onAddToCart={async (p, qty, options) => {
+        await addItem(p, qty, options);
+      }}
+    />
+  );
+}
+
+function ProductDetailView({
+  product,
+  related,
+  onAddToCart,
+}: {
+  product: ProductWithDetails;
+  related: Product[];
+  onAddToCart: (
+    product: ProductWithDetails,
+    quantity: number,
+    options: AddToCartOptions,
+  ) => Promise<void>;
+}) {
   const displayProduct = withProductImage(product);
 
   return (
@@ -31,9 +92,7 @@ export function ProductDetail({
       <SdkProductPage
         product={displayProduct}
         showRelated={false}
-        onAddToCart={async (p, qty, options) => {
-          await addItem(p, qty, options);
-        }}
+        onAddToCart={onAddToCart}
         renderImage={({ src, alt, className }) => (
           <Image
             src={src}

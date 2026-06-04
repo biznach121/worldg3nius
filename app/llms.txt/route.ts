@@ -1,27 +1,43 @@
 import { getServerClient, tags, type Product } from "@cimplify/sdk/server";
 import { brand } from "@/lib/brand";
 import { getSiteUrl } from "@/lib/site-url";
+import {
+  demoCategories,
+  demoCollections,
+  demoProducts,
+  shouldUseDemoCatalogue,
+} from "@/lib/demo-catalogue";
 
 export const revalidate = 3600;
 
 async function buildLlmsTxt(SITE_URL: string): Promise<string> {
-  const client = getServerClient();
-  const [productsRes, categoriesRes, collectionsRes] = await Promise.all([
-    client.catalogue.getProducts(
-      { limit: 500 },
-      { cacheOptions: { revalidate: 3600, tags: [tags.products()] } },
-    ),
-    client.catalogue.getCategories({
-      cacheOptions: { revalidate: 3600, tags: [tags.categories()] },
-    }),
-    client.catalogue.getCollections({
-      cacheOptions: { revalidate: 3600, tags: [tags.collections()] },
-    }),
-  ]);
+  let products: Product[];
+  let categories;
+  let collections;
 
-  const products: Product[] = productsRes.ok ? productsRes.value.items : [];
-  const categories = categoriesRes.ok ? categoriesRes.value : [];
-  const collections = collectionsRes.ok ? collectionsRes.value : [];
+  if (shouldUseDemoCatalogue()) {
+    products = demoProducts;
+    categories = demoCategories;
+    collections = demoCollections;
+  } else {
+    const client = getServerClient();
+    const [productsRes, categoriesRes, collectionsRes] = await Promise.all([
+      client.catalogue.getProducts(
+        { limit: 500 },
+        { cacheOptions: { revalidate: 3600, tags: [tags.products()] } },
+      ),
+      client.catalogue.getCategories({
+        cacheOptions: { revalidate: 3600, tags: [tags.categories()] },
+      }),
+      client.catalogue.getCollections({
+        cacheOptions: { revalidate: 3600, tags: [tags.collections()] },
+      }),
+    ]);
+
+    products = productsRes.ok ? productsRes.value.items : [];
+    categories = categoriesRes.ok ? categoriesRes.value : [];
+    collections = collectionsRes.ok ? collectionsRes.value : [];
+  }
 
   const lines: string[] = [];
   lines.push(`# ${brand.name}`);

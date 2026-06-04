@@ -10,9 +10,19 @@ import {
 } from "@cimplify/sdk/server";
 import { ListingClient } from "./listing-client";
 import { brand } from "@/lib/brand";
+import {
+  demoCategories,
+  getDemoCategoryBySlug,
+  getDemoProductsByCategory,
+  shouldUseDemoCatalogue,
+} from "@/lib/demo-catalogue";
 
 // See app/products/[slug]/page.tsx for the rationale on generateStaticParams.
 export async function generateStaticParams() {
+  if (shouldUseDemoCatalogue()) {
+    return demoCategories.map((c) => ({ slug: c.slug ?? c.id }));
+  }
+
   const r = await getServerClient().catalogue.getCategories();
   if (!r.ok || r.value.length === 0) {
     return [{ slug: "__placeholder__" }];
@@ -32,6 +42,18 @@ type CategoryResult =
   | { ok: false; code: string };
 
 async function getCategory(slug: string): Promise<CategoryResult> {
+  if (shouldUseDemoCatalogue()) {
+    const category = getDemoCategoryBySlug(slug);
+    if (!category) return { ok: false, code: "NOT_FOUND" };
+    return {
+      ok: true,
+      data: {
+        category,
+        products: getDemoProductsByCategory(category.id),
+      },
+    };
+  }
+
   const client = getServerClient();
   const catRes = await client.catalogue.getCategoryBySlug(slug, {
     cacheOptions: { revalidate: 3600, tags: [tags.categories()] },

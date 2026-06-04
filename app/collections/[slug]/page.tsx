@@ -10,9 +10,19 @@ import {
 } from "@cimplify/sdk/server";
 import { ListingClient } from "./listing-client";
 import { brand } from "@/lib/brand";
+import {
+  demoCollections,
+  getDemoCollectionBySlug,
+  getDemoProductsByCollection,
+  shouldUseDemoCatalogue,
+} from "@/lib/demo-catalogue";
 
 // See app/products/[slug]/page.tsx for the rationale on generateStaticParams.
 export async function generateStaticParams() {
+  if (shouldUseDemoCatalogue()) {
+    return demoCollections.map((c) => ({ slug: c.slug ?? c.id }));
+  }
+
   const r = await getServerClient().catalogue.getCollections();
   if (!r.ok || r.value.length === 0) {
     return [{ slug: "__placeholder__" }];
@@ -32,6 +42,18 @@ type CollectionResult =
   | { ok: false; code: string };
 
 async function getCollection(slug: string): Promise<CollectionResult> {
+  if (shouldUseDemoCatalogue()) {
+    const collection = getDemoCollectionBySlug(slug);
+    if (!collection) return { ok: false, code: "NOT_FOUND" };
+    return {
+      ok: true,
+      data: {
+        collection,
+        products: getDemoProductsByCollection(collection.id),
+      },
+    };
+  }
+
   const client = getServerClient();
   const colRes = await client.catalogue.getCollectionBySlug(slug, {
     cacheOptions: { revalidate: 3600, tags: [tags.collections()] },

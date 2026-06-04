@@ -302,6 +302,65 @@
     color: var(--color-background) !important;
   }
 
+  .wg-product-detail-page [data-cimplify-variant-axis-options] {
+    display: grid !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    gap: 0.5rem !important;
+    max-width: 22rem;
+  }
+
+  .wg-product-detail-page [data-cimplify-variant-option] {
+    min-height: 3rem !important;
+    justify-content: center !important;
+    border: 1px solid var(--color-foreground) !important;
+    border-radius: 0 !important;
+    background-color: var(--color-background) !important;
+    color: var(--color-foreground) !important;
+    text-align: center !important;
+    font-size: 0.95rem !important;
+    line-height: 1 !important;
+    text-transform: uppercase;
+  }
+
+  .wg-product-detail-page [data-cimplify-variant-list] {
+    display: grid !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    gap: 0.5rem !important;
+    max-width: 22rem;
+  }
+
+  .wg-product-detail-page [data-cimplify-variant-list] [data-cimplify-variant-option] {
+    width: auto !important;
+    min-height: 3rem !important;
+    padding: 0 !important;
+  }
+
+  .wg-product-detail-page [data-cimplify-variant-list-header],
+  .wg-product-detail-page [data-cimplify-variant-radio],
+  .wg-product-detail-page [data-cimplify-variant-pricing] {
+    display: none !important;
+  }
+
+  .wg-product-detail-page [data-cimplify-variant-name] {
+    flex: none !important;
+    min-width: 0 !important;
+    text-align: center !important;
+    font-size: 0.95rem !important;
+    font-weight: 400 !important;
+  }
+
+  .wg-product-detail-page [data-cimplify-variant-option][data-selected="true"] {
+    background-color: var(--color-foreground) !important;
+    border-color: var(--color-foreground) !important;
+    color: var(--color-background) !important;
+  }
+
+  .wg-product-detail-page [data-cimplify-customizer-submit] {
+    border-radius: 0 !important;
+    min-height: 3.5rem !important;
+    text-transform: uppercase;
+  }
+
   .wg-product-detail-page [data-cimplify-variant-radio] {
     border-color: var(--color-foreground) !important;
   }
